@@ -2,7 +2,7 @@ name: Criação de Repositório MuleSoft automatizado
 
 on:
 	issues:
-		type: [opened, reopened]
+		types: [opened, reopened]
 
 jobs:
 	add-comment:
