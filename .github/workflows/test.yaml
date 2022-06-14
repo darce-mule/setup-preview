@@ -5,93 +5,93 @@ on:
     types: [opened, reopened]
 
 jobs:
-	add-comment:
-		name: Add comment on issue
-		#runs-on: itau-linux
-		if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
-		steps:
-			- name: Create comment
-			  uses: peter-evans/create-or-update-comment@v1
-			  with: 
-				  issue-number: ${{ github.event.issue.number }}
-				  body: |
-				  	Acompanhe o setup através do link: https://github.com/${{github.repository}}/actions/run/${{github.run_id}}
-				  reactions: '+1'	
+  add-comment:
+    name: Add comment on issue
+    #runs-on: itau-linux
+    if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with: 
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Acompanhe o setup através do link: https://github.com/${{github.repository}}/actions/run/${{github.run_id}}
+          reactions: '+1'  
 
-	form-to-json:
-		name: Convert Form Issue to JSON
-		#runs-on: itau-linux
-		needs: [add-comment]
-		outputs:
-			payload-parsed: ${{ steps.payload.outputs.json_var }}
-		steps:
-			- name: Run issue form parser
-			  id: parse
-			  uses: peter-evans/issue-forms-body-parser@v2.0.0
-			  with:
-			  	issue_id: ${{ github.event.issue.number }} 
-			  	separator: '###'
-			  	label_maker_start: '>>'
-			  	label_maker_end: '<<'
+  form-to-json:
+    name: Convert Form Issue to JSON
+    #runs-on: itau-linux
+    needs: [add-comment]
+    outputs:
+      payload-parsed: ${{ steps.payload.outputs.json_var }}
+    steps:
+      - name: Run issue form parser
+        id: parse
+        uses: peter-evans/issue-forms-body-parser@v2.0.0
+        with:
+          issue_id: ${{ github.event.issue.number }} 
+          separator: '###'
+          label_maker_start: '>>'
+          label_maker_end: '<<'
 
-			- name: Set output
-			  id: payload
-			  run: echo ::set-output name=json_var::'${{ steps.parse.outputs.payload }}'
+      - name: Set output
+        id: payload
+        run: echo ::set-output name=json_var::'${{ steps.parse.outputs.payload }}'
 
-			- name: Show output
-			  id: payload
-			  run: echo "${{ toJson(steps.payload.outputs.json_var) }}"
+      - name: Show output
+        id: payload
+        run: echo "${{ toJson(steps.payload.outputs.json_var) }}"
 
-#	validate-member:
-#		uses: itau-corp/itau-up2-reusable-workflows-setup-iupipes/.github/workflow/validate-member.yml@v1
-#		needs: form-to-json
-#		with:
-#			sigla: ${{ fromJson(needs.form-to-json.) }}
-#		secrets: inherit
+#  validate-member:
+#    uses: itau-corp/itau-up2-reusable-workflows-setup-iupipes/.github/workflow/validate-member.yml@v1
+#    needs: form-to-json
+#    with:
+#      sigla: ${{ fromJson(needs.form-to-json.) }}
+#    secrets: inherit
 
-#	create-github-repo:
-#		uses: itau-corp/itau-up2-reusable-workflows-setup-iupipes/.github/workflow/create-repo.yml@v1
-#		needs:
-#			- form-to-json
-#			- validate-member
-#		with:
-#			payload: ${{ needs.form-to-json.outputs.payload-parsed }}
+#  create-github-repo:
+#    uses: itau-corp/itau-up2-reusable-workflows-setup-iupipes/.github/workflow/create-repo.yml@v1
+#    needs:
+#      - form-to-json
+#      - validate-member
+#    with:
+#      payload: ${{ needs.form-to-json.outputs.payload-parsed }}
 
-	add-comment:
-		name: Add comment on issue
-#		runs-on: itau-linux
-		if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
-		steps:
-			- name: Create comment
-			  uses: peter-evans/create-or-update-comment@v1
-			  with: 
-				  issue-number: ${{ github.event.issue.number }}
-				  body: |
-				  	Acompanhe o setup através do link: https://github.com/${{github.repository}}/actions/run/${{github.run_id}}
-				  reactions: '+1'	
+  add-comment:
+    name: Add comment on issue
+#    runs-on: itau-linux
+    if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with: 
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Acompanhe o setup através do link: https://github.com/${{github.repository}}/actions/run/${{github.run_id}}
+          reactions: '+1'  
 
-	final-comment:
-		name: Add comment on Issue
-		needs: [create-github-repo]
-#		runs-on: itau-linux
-		if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
-		steps:
-			- name: Create comment
-			  uses: peter-evans/create-or-update-comment@v1
-			  with:
-				  issue-number: ${{ github.event.issue.number }}
-				  body: |
-				    Sucesso na criação do repositório. Repositório criado: https://github.com/itau-corp/${{needs.create-github-repo.outputs.repo_name}}
-				  reactions: '+1'
+  final-comment:
+    name: Add comment on Issue
+    needs: [create-github-repo]
+#    runs-on: itau-linux
+    if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Sucesso na criação do repositório. Repositório criado: https://github.com/itau-corp/${{needs.create-github-repo.outputs.repo_name}}
+          reactions: '+1'
 
-	auto-closing-issue:
-		name: Auto-closing Issue
-#		runs-on: itau-linux
-		needs: [final-comment]
-		steps:
-			- name: Close Issue
-			  id: parse
-			  uses: peter-evans/close-issue@v1
-			  with:
-				  issue-number: ${{ github.event.issue.number }}
-				  comment: Fechando issue automaticamente
+  auto-closing-issue:
+    name: Auto-closing Issue
+#    runs-on: itau-linux
+    needs: [final-comment]
+    steps:
+      - name: Close Issue
+        id: parse
+        uses: peter-evans/close-issue@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          comment: Fechando issue automaticamente
