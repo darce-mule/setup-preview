@@ -57,19 +57,6 @@ jobs:
 #    with:
 #      payload: ${{ needs.form-to-json.outputs.payload-parsed }}
 
-  add-comment:
-    name: Add comment on issue
-#    runs-on: itau-linux
-    if: ${{ contains(github.event.issue.labels.*.name, 'MuleSoft') }}
-    steps:
-      - name: Create comment
-        uses: peter-evans/create-or-update-comment@v1
-        with: 
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            Acompanhe o setup através do link: https://github.com/${{github.repository}}/actions/run/${{github.run_id}}
-          reactions: '+1'  
-
   final-comment:
     name: Add comment on Issue
     needs: [create-github-repo]
